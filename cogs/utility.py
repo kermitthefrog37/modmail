@@ -390,6 +390,7 @@ class Utility(commands.Cog):
         with open(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), f"../temp/{log_file_name}.log"),
             "r+",
+            encoding="utf-8",
         ) as f:
             logs = f.read().strip()
 
@@ -443,6 +444,7 @@ class Utility(commands.Cog):
         with open(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), f"../temp/{log_file_name}.log"),
             "rb+",
+            encoding="utf-8",
         ) as f:
             logs = BytesIO(f.read().strip())
 
@@ -693,7 +695,7 @@ class Utility(commands.Cog):
             option = user_or_role[0].lower()
             if option == "disable":
                 embed = discord.Embed(
-                    description=f"Disabled mention on thread creation.",
+                    description="Disabled mention on thread creation.",
                     color=self.bot.main_color,
                 )
                 self.bot.config["mention"] = None
@@ -891,7 +893,7 @@ class Utility(commands.Cog):
                 description=f"`{key}` is an invalid key.",
             )
             if closest:
-                embed.add_field(name=f"Perhaps you meant:", value="\n".join(f"`{x}`" for x in closest))
+                embed.add_field(name="Perhaps you meant:", value="\n".join(f"`{x}`" for x in closest))
             return await ctx.send(embed=embed)
 
         config_help = self.bot.config.config_help
@@ -1747,9 +1749,14 @@ class Utility(commands.Cog):
             split_cmd = command.split(" ")
             for n in range(1, len(split_cmd) + 1):
                 if self.bot.get_command(" ".join(split_cmd[0:n])):
-                    print(self.bot.get_command(" ".join(split_cmd[0:n])))
                     valid = True
                     break
+
+            if not valid and self.bot.aliases:
+                for n in range(1, len(split_cmd) + 1):
+                    if self.bot.aliases.get(" ".join(split_cmd[0:n])):
+                        valid = True
+                        break
 
             if valid:
                 self.bot.auto_triggers[keyword] = command
@@ -1764,7 +1771,7 @@ class Utility(commands.Cog):
                 embed = discord.Embed(
                     title="Error",
                     color=self.bot.error_color,
-                    description="Invalid command. Note that autotriggers do not work with aliases.",
+                    description="Invalid command. Please provide a valid command or alias.",
                 )
 
         await ctx.send(embed=embed)
@@ -1784,6 +1791,12 @@ class Utility(commands.Cog):
                     valid = True
                     break
 
+            if not valid and self.bot.aliases:
+                for n in range(1, len(split_cmd) + 1):
+                    if self.bot.aliases.get(" ".join(split_cmd[0:n])):
+                        valid = True
+                        break
+
             if valid:
                 self.bot.auto_triggers[keyword] = command
                 await self.bot.config.update()
@@ -1797,7 +1810,7 @@ class Utility(commands.Cog):
                 embed = discord.Embed(
                     title="Error",
                     color=self.bot.error_color,
-                    description="Invalid command. Note that autotriggers do not work with aliases.",
+                    description="Invalid command. Please provide a valid command or alias.",
                 )
 
         await ctx.send(embed=embed)
@@ -1849,7 +1862,7 @@ class Utility(commands.Cog):
         embed = discord.Embed(
             title="Keyword Not Found",
             color=self.bot.error_color,
-            description=f"No autotrigger keyword found.",
+            description="No autotrigger keyword found.",
         )
         return await ctx.send(embed=embed)
 
